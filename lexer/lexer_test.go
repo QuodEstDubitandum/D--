@@ -29,7 +29,7 @@ func TestConstStatement(t *testing.T){
 	for i, test := range tests {
 		tok := l.NextToken()
 		if tok.Type != test.Type {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%d, got=%d", i, test.Type, tok.Type)
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%s, got=%s", i, ASCIIMap[test.Type], ASCIIMap[tok.Type])
 		}
 		if tok.Literal != test.Literal {
 			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",i, test.Literal, tok.Literal)
@@ -76,7 +76,7 @@ func TestVarStatements(t *testing.T){
 		tok := l.NextToken()
 		if tok.Type != test.Type {
 			fmt.Println(tok.Type, tok.Literal)
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%d, got=%d", i, test.Type, tok.Type)
+			t.Fatalf("tests[%d] - tokentype wrong. expected=%s, got=%s", i, ASCIIMap[test.Type], ASCIIMap[tok.Type])
 		}
 		if tok.Literal != test.Literal {
 			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",i, test.Literal, tok.Literal)

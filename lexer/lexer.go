@@ -229,6 +229,7 @@ func (l *Lexer) readNumber() Token {
 				return Token{ILLEGAL, string(l.buffer[position:l.evalPosition]), "Invalid number"}
 			}
 			isFloat = true
+			l.nextChar()
 		} else if isNumber(l.peekChar()) {
 			l.nextChar()
 		} else {

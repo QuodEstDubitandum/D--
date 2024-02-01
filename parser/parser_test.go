@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -18,50 +17,61 @@ func TestVarStatements(t *testing.T) {
 
 	p := NewParser(l)
 	program := p.ParseProgram()
+	checkParserErrors(t, p)
 
-	if program == nil {
-		t.Fatalf("ParseProgram() returned nil")
-	}
-
-	fmt.Println(program)
 	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements does not contain 3 statements. got=%d",
-		len(program.Statements))
+		t.Fatalf("program.Statements does not contain 3 statements. got=%d", len(program.Statements))
 	}
 
-	tests := []struct {
-		expectedIdentifier string
-	}{
-		{"x"},
-		{"y"},
-		{"foobar"},
-	}
-	
-	for i, tt := range tests {
-		stmt := program.Statements[i]
-		fmt.Println(stmt)
-		if !testVarStatement(t, stmt, tt.expectedIdentifier) {
-			return
+	for _, stmt := range program.Statements {
+		varStatement, ok := stmt.(*ast.VarStatement)
+		if !ok {
+			t.Errorf("stmt not *ast.VarStatement. got=%T", stmt)
+			continue
+		}
+		if varStatement.TokenLiteral() != "var" {
+			t.Errorf("varStatement.TokenLiteral not 'var', got %q", varStatement.TokenLiteral())
 		}
 	}
 }
 
-func testVarStatement(t *testing.T, s ast.Statement, name string) bool {
-	if s.TokenLiteral() != "var" {
-		t.Errorf("s.TokenLiteral not 'var'. got=%q", s.TokenLiteral())
-		return false
+func TestReturnStatements(t *testing.T) {
+	file, err := os.Open("../test_files/return_statement.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	l := lexer.NewLexer(file)
+
+	p := NewParser(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 2 {
+		t.Fatalf("program.Statements does not contain 2 statements. got=%d", len(program.Statements))
 	}
 
-	varStmt, ok := s.(*ast.VarStatement)
-	if !ok {
-		t.Errorf("s not *ast.VarStatement. got=%T", s)
-		return false
+	for _, stmt := range program.Statements {
+		returnStmt, ok := stmt.(*ast.ReturnStatement)
+		if !ok {
+			t.Errorf("stmt not *ast.ReturnStatement. got=%T", stmt)
+			continue
+		}
+		if returnStmt.TokenLiteral() != "return" {
+			t.Errorf("returnStmt.TokenLiteral not 'return', got %q", returnStmt.TokenLiteral())
+		}
+	}
+}
+
+func checkParserErrors(t *testing.T, p *Parser) {
+	if len(p.errors) == 0 {
+		return
 	}
 
-	if varStmt.IdentifierName != name {
-		t.Errorf("varStmt.Name.Value not '%s'. got=%s", name, varStmt.IdentifierName)
-		return false
+	t.Errorf("parser encountered %d errors", len(p.errors))
+	
+	for _, msg := range p.errors {
+		t.Errorf("parser error: %q", msg)
 	}
 
-	return true
+	t.FailNow()
 }

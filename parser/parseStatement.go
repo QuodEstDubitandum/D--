@@ -9,6 +9,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	switch p.currentToken.Type {
 	case lexer.VAR:
 		return p.parseVarStatement()
+	case lexer.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return nil
 	}
@@ -17,29 +19,29 @@ func (p *Parser) parseStatement() ast.Statement {
 func (p *Parser) parseVarStatement() *ast.VarStatement {
 	stmt := &ast.VarStatement{Token: p.currentToken}
 
-	if !p.isNextToken(lexer.SPACE) {
+	if !p.IsNextToken(lexer.SPACE) {
 		return nil
 	}
 
-	if !p.isNextToken(lexer.ID) {
+	if !p.IsNextToken(lexer.ID) {
 		return nil
 	}
 
 	stmt.IdentifierName = p.currentToken.Literal
 
-	if !p.isNextToken(lexer.SPACE) {
+	if !p.IsNextToken(lexer.SPACE) {
 		return nil
 	}
 
-	if !p.isNextToken(lexer.ASSIGN) {
+	if !p.IsNextToken(lexer.ASSIGN) {
 		return nil
 	}
 
-	if !p.isNextToken(lexer.SPACE) {
+	if !p.IsNextToken(lexer.SPACE) {
 		return nil
 	}
 
-	if !p.isNextToken(lexer.INT) {
+	if !p.IsNextToken(lexer.INT) {
 		return nil
 	}
 
@@ -47,6 +49,7 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 		if p.evalToken.Type == lexer.SPACE || p.evalToken.Type == lexer.TAB {
 			p.nextToken()
 		} else {
+			p.nextTokenError(lexer.NEWLINE, p.evalToken.Type)
 			return nil
 		}
 	}
@@ -54,10 +57,25 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 	return stmt
 }
 
-func (p *Parser) isNextToken(tokenType lexer.TokenType) bool {
-	if p.evalToken.Type != tokenType {
-		return false
+func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
+	stmt := &ast.ReturnStatement{Token: p.currentToken}
+
+	if !p.IsNextToken(lexer.SPACE) {
+		return nil
 	}
-	p.nextToken()
-	return true
+
+	if !p.IsNextToken(lexer.INT) {
+		return nil
+	}
+
+	for p.evalToken.Type != lexer.NEWLINE && p.evalToken.Type != lexer.EOF {
+		if p.evalToken.Type == lexer.SPACE || p.evalToken.Type == lexer.TAB {
+			p.nextToken()
+		} else {
+			p.nextTokenError(lexer.NEWLINE, p.evalToken.Type)
+			return nil
+		}
+	}
+
+	return stmt
 }

@@ -36,3 +36,11 @@ type VarStatement struct {
 
 func (vs *VarStatement) statementNode() {}
 func (vs *VarStatement) TokenLiteral() string { return vs.Token.Literal }
+
+type ReturnStatement struct {
+	Token lexer.Token
+	ReturnValue Expression
+}
+
+func (rs *ReturnStatement) statementNode() {}
+func (rs *ReturnStatement) TokenLiteral() string { return rs.Token.Literal }
