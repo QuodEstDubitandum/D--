@@ -28,19 +28,45 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
+type Identifier struct {
+	Token token.Token
+	Value string
+}
+	
+func (i *Identifier) expressionNode() {}
+func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
+
+type ExpressionStatement struct{
+	Token token.Token
+	Value Expression
+}
+
+func (vs *ExpressionStatement) statementNode() {}
+func (vs *ExpressionStatement) TokenLiteral() string { return vs.Token.Literal }
+
+
 type VarStatement struct {
 	Token lexer.Token
-	IdentifierName string
+	Name Identifier
 	Value Expression
 }
 
 func (vs *VarStatement) statementNode() {}
 func (vs *VarStatement) TokenLiteral() string { return vs.Token.Literal }
 
+
 type ReturnStatement struct {
 	Token lexer.Token
-	ReturnValue Expression
+	Value Expression
 }
 
 func (rs *ReturnStatement) statementNode() {}
 func (rs *ReturnStatement) TokenLiteral() string { return rs.Token.Literal }
+
+type IntegerLiteral struct {
+	Token token.Token
+	Value int64
+}
+	
+func (il *IntegerLiteral) expressionNode() {}
+func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }

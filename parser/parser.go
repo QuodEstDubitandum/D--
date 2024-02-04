@@ -27,6 +27,12 @@ func NewParser(l *lexer.Lexer) *Parser {
 		l: l,
 		errors: []string{},
 	}
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+	p.registerPrefix(token.IDENT, p.ParseIdentifier)
+	p.registerPrefix(token.INT, p.ParseIntegerLiteral)
+	p.registerPrefix(token.BANG, p.ParsePrefixExpression)
+	p.registerPrefix(token.MINUS, p.ParsePrefixExpression)
+
 	p.nextToken()
 	p.nextToken()
 	return p
@@ -51,14 +57,10 @@ func (p *Parser) ParseProgram() *ast.Program {
 	return program
 }
 
-func (p *Parser) nextTokenError(expectToken lexer.TokenType, gotToken lexer.TokenType) {
-	msg := fmt.Sprintf("expected next token to be %s, got %s instead", lexer.ASCIIMap[expectToken], lexer.ASCIIMap[gotToken])
-	p.errors = append(p.errors, msg)
-}
 
 func (p *Parser) IsNextToken(tokenType lexer.TokenType) bool {
 	if p.evalToken.Type != tokenType {
-		p.nextTokenError(tokenType, p.evalToken.Type)
+		p.NextTokenError(tokenType, p.evalToken.Type)
 		return false
 	}
 	p.nextToken()
