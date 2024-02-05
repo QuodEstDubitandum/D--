@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"fmt"
-
 	"github.com/QuodEstDubitandum/D--/ast"
 	"github.com/QuodEstDubitandum/D--/lexer"
 )
@@ -27,11 +25,23 @@ func NewParser(l *lexer.Lexer) *Parser {
 		l: l,
 		errors: []string{},
 	}
-	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
-	p.registerPrefix(token.IDENT, p.ParseIdentifier)
-	p.registerPrefix(token.INT, p.ParseIntegerLiteral)
-	p.registerPrefix(token.BANG, p.ParsePrefixExpression)
-	p.registerPrefix(token.MINUS, p.ParsePrefixExpression)
+	p.prefixParseFns = make(map[lexer.TokenType]prefixParseFn)
+	p.infixParseFns = make(map[lexer.TokenType]infixParseFn)
+	p.registerPrefix(lexer.ID, p.parseIdentifier)
+	p.registerPrefix(lexer.INT, p.parseIntegerLiteral)
+	p.registerPrefix(lexer.EXCLAMATION, p.parsePrefixExpression)
+	p.registerPrefix(lexer.MINUS, p.parsePrefixExpression)
+	p.registerInfix(lexer.PLUS, p.parseInfixExpression)
+	p.registerInfix(lexer.MINUS, p.parseInfixExpression)
+	p.registerInfix(lexer.SLASH, p.parseInfixExpression)
+	p.registerInfix(lexer.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(lexer.EQUAL, p.parseInfixExpression)
+	p.registerInfix(lexer.NOT_EQUAL, p.parseInfixExpression)
+	p.registerInfix(lexer.SMALLER, p.parseInfixExpression)
+	p.registerInfix(lexer.GREATER, p.parseInfixExpression)
+	p.registerInfix(lexer.SOR_EQUAL, p.parseInfixExpression)
+	p.registerInfix(lexer.GOR_EQUAL, p.parseInfixExpression)
+	p.registerInfix(lexer.DOUBLE_ASTERISK, p.parseInfixExpression)
 
 	p.nextToken()
 	p.nextToken()
@@ -67,6 +77,20 @@ func (p *Parser) IsNextToken(tokenType lexer.TokenType) bool {
 	return true
 }
 	
+func (p *Parser) NextTokenIsSpace() bool {
+	if p.evalToken.Type == lexer.SPACE {
+		p.nextToken()
+		return true
+	}
+
+	if p.evalToken.Type == lexer.EOF || p.evalToken.Type == lexer.NEWLINE {
+		return true
+	}
+
+	p.MissingSpaceError(p.evalToken.Type)
+	return false
+}
+
 func (p *Parser) registerPrefix(tokenType lexer.TokenType, fn prefixParseFn) {
 	p.prefixParseFns[tokenType] = fn
 }

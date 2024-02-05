@@ -11,6 +11,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseVarStatement()
 	case lexer.RETURN:
 		return p.parseReturnStatement()
+	case lexer.NEWLINE:
+		return nil
 	default:
 		return p.ParseExpressionStatement()
 	}
@@ -27,7 +29,7 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 		return nil
 	}
 
-	stmt.IdentifierName = p.currentToken.Literal
+	stmt.Name = &ast.Identifier{Token: p.currentToken, Value: p.currentToken.Literal} 
 
 	if !p.IsNextToken(lexer.SPACE) {
 		return nil
@@ -41,18 +43,21 @@ func (p *Parser) parseVarStatement() *ast.VarStatement {
 		return nil
 	}
 
+	// TODO: also parse other primary types
 	if !p.IsNextToken(lexer.INT) {
 		return nil
 	}
+
 
 	for p.evalToken.Type != lexer.NEWLINE && p.evalToken.Type != lexer.EOF {
 		if p.evalToken.Type == lexer.SPACE || p.evalToken.Type == lexer.TAB {
 			p.nextToken()
 		} else {
-			p.nextTokenError(lexer.NEWLINE, p.evalToken.Type)
+			p.NextTokenError(lexer.NEWLINE, p.evalToken.Type)
 			return nil
 		}
 	}
+	p.nextToken()
 
 	return stmt
 }
@@ -64,6 +69,7 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 		return nil
 	}
 
+	// TODO: also parse other primary types
 	if !p.IsNextToken(lexer.INT) {
 		return nil
 	}
@@ -72,10 +78,11 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 		if p.evalToken.Type == lexer.SPACE || p.evalToken.Type == lexer.TAB {
 			p.nextToken()
 		} else {
-			p.nextTokenError(lexer.NEWLINE, p.evalToken.Type)
+			p.NextTokenError(lexer.NEWLINE, p.evalToken.Type)
 			return nil
 		}
 	}
+	p.nextToken()
 
 	return stmt
 }

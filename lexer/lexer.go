@@ -98,7 +98,7 @@ func (l *Lexer) NextToken() Token {
 	case '=':
 		tok = l.readAssign()
 	case '>':
-		tok = Token{GREATER, string(l.ch), ""}
+		tok = l.readGreater()
 	case '<':
 		tok = l.readSmaller()
 	case '+':
@@ -107,6 +107,8 @@ func (l *Lexer) NextToken() Token {
 		tok = l.readMinus()
 	case '*':
 		tok = l.readAsterisk()
+	case '/':
+		tok = l.readSlash()
 
 	case 0:
 		tok = Token{EOF, "", ""}
@@ -174,17 +176,32 @@ func (l *Lexer) readSmaller() Token {
 	return Token{SMALLER, string(l.ch), ""}
 }
 
+func (l *Lexer) readGreater() Token {
+	nextChar := l.peekChar()
+	if nextChar == '=' {
+		l.nextChar()
+		return Token{GOR_EQUAL, ">=", ""}
+	}
+	return Token{GREATER, string(l.ch), ""}
+}
+
+
 func (l *Lexer) readAssign() Token {
 	nextChar := l.peekChar()
 	if nextChar == '=' {
 		l.nextChar()
 		return Token{EQUAL, "==", ""}
 	}
-	if nextChar == '>' {
-		l.nextChar()
-		return Token{GOR_EQUAL, "=>", ""}
-	}
 	return Token{ASSIGN, string(l.ch), ""}
+}
+
+func (l *Lexer) readSlash() Token {
+	nextChar := l.peekChar()
+	if nextChar == '/' {
+		l.nextChar()
+		return Token{COMMENT, "//", ""}
+	}
+	return Token{SLASH, string(l.ch), ""}
 }
 
 // TODO
