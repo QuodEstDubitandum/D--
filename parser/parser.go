@@ -62,7 +62,11 @@ func (p *Parser) ParseProgram() *ast.Program {
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
-		p.nextToken()
+		
+		// p.nextToken()
+		if !p.advanceUntilNewLine() {
+			break
+		}
 	}
 	return program
 }
@@ -89,6 +93,19 @@ func (p *Parser) NextTokenIsSpace() bool {
 
 	p.MissingSpaceError(p.evalToken.Type)
 	return false
+}
+
+func (p *Parser) advanceUntilNewLine() bool {
+	for p.evalToken.Type != lexer.NEWLINE && p.evalToken.Type != lexer.EOF {
+		if p.evalToken.Type == lexer.SPACE || p.evalToken.Type == lexer.TAB {
+			p.nextToken()
+		} else {
+			p.NextTokenError(lexer.NEWLINE, p.evalToken.Type)
+			return false
+		}
+	}
+	p.nextToken()
+	return true
 }
 
 func (p *Parser) registerPrefix(tokenType lexer.TokenType, fn prefixParseFn) {

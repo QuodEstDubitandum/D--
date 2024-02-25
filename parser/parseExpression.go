@@ -12,9 +12,19 @@ func (p *Parser) ParseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{Token: p.currentToken}
 	stmt.Value = p.parseExpression(LOWEST)
 
-	// if p.IsNextToken(lexer.NEWLINE) {
-	// 	p.nextToken()
-	// }
+	if !p.IsNextToken(lexer.SPACE) {
+		return nil
+	}
+
+	if !p.IsNextToken(lexer.ASSIGN) {
+		return nil
+	}
+
+	if !p.IsNextToken(lexer.SPACE) {
+		return nil
+	}
+
+	stmt.Value = p.parseExpression(LOWEST)
 
 	return stmt
 }

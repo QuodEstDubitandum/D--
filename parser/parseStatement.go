@@ -12,7 +12,8 @@ func (p *Parser) parseStatement() ast.Statement {
 	case lexer.RETURN:
 		return p.parseReturnStatement()
 	case lexer.NEWLINE:
-		return nil
+		p.nextToken()
+		return p.parseStatement()
 	default:
 		return p.ParseExpressionStatement()
 	}

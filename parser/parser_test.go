@@ -76,41 +76,8 @@ func checkParserErrors(t *testing.T, p *Parser) {
 	t.FailNow()
 }
 
-func TestUnaryExpressions(t *testing.T) {
-	file, err := os.Open("../test_files/unary_expression_statement.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	l := lexer.NewLexer(file)
-
-	p := NewParser(l)
-	program := p.ParseProgram()
-	checkParserErrors(t, p)
-	if len(program.Statements) != 2 {
-		t.Fatalf("program.Statements does not contain %d statements. got=%d\n", 2, len(program.Statements))
-	}
-
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
-	}
-
-	_, ok = stmt.Value.(*ast.PrefixExpression)
-	if !ok {
-		t.Fatalf("stmt is not ast.PrefixExpression. got=%T", stmt.Value)
-	}
-
-	// if exp.Operator != "!" {
-	// 	t.Fatalf("exp.Operator is not !. got=%s", exp.Operator)
-	// }
-
-	// if !testIntegerLiteral(t, exp.Right, tt.integerValue) {
-	// 	return
-	// }
-}
-
-func TestBinaryExpressions(t *testing.T) {
-	file, err := os.Open("../test_files/binary_expression_statement.txt")
+func TestExpressions(t *testing.T) {
+	file, err := os.Open("../test_files/expression_statement.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,21 +90,16 @@ func TestBinaryExpressions(t *testing.T) {
 		t.Fatalf("program.Statements does not contain %d statements. got=%d\n", 3, len(program.Statements))
 	}
 
-	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
-	if !ok {
-		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	for _, stmt := range program.Statements {
+		stmt, ok := stmt.(*ast.ExpressionStatement)
+		if !ok {
+			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+		}
+
+		_ , ok = stmt.Value.(*ast.InfixExpression)
+		if !ok {
+			t.Fatalf("stmt is not ast.InfixExpression. got=%T", stmt.Value)
+		}
 	}
-
-	_ , ok = stmt.Value.(*ast.InfixExpression)
-	if !ok {
-		t.Fatalf("stmt is not ast.InfixExpression. got=%T", stmt.Value)
-	}
-
-	// if exp.Operator != "+" {
-	// 	t.Fatalf("exp.Operator is not +. got=%s", exp.Operator)
-	// }
-
-	// if !testIntegerLiteral(t, exp.Right, tt.integerValue) {
-	// 	return
-	// }
 }
+
